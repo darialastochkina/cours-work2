@@ -33,8 +33,22 @@ def test_main_no_vacancies(monkeypatch, capsys):
 
 def test_main_with_vacancies(monkeypatch, capsys):
     """main выводит топ-N вакансий после фильтрации по min_salary."""
-    vac1 = Vacancy("Low", "C", 100, None, "USD", "u1")
-    vac2 = Vacancy("High", "C", 200, None, "USD", "u2")
+    vac1 = Vacancy(
+        title="Low",
+        company="Test Company",
+        url="http://test.com",
+        salary_from=100,
+        salary_to=None,
+        currency="RUR"
+    )
+    vac2 = Vacancy(
+        title="High",
+        company="Test Company",
+        url="http://test.com",
+        salary_from=200,
+        salary_to=None,
+        currency="RUR"
+    )
     inputs = iter(["", "2", "150", "2"])
     monkeypatch.setattr(
         builtins,

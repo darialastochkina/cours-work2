@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import json
 from typing import List
-from src.vacancy import Vacancy
+from .vacancy import Vacancy
 
 
 class VacancySaver(ABC):
@@ -20,22 +20,19 @@ class VacancySaver(ABC):
 
 
 class JSONSaver(VacancySaver):
-    """Реализация VacancySaver для JSON-файла."""
-    def __init__(self, filename: str = "vacancies.json") -> None:
-        """Инициализирует сохранитель с именем JSON-файла."""
+    """Класс для работы с JSON-файлом"""
+    
+    def __init__(self, filename: str):
         self.__filename = filename
 
     def save_vacancies(self, vacancies: List[Vacancy]) -> None:
-        """Сохраняет вакансии в файл, обновляя по URL без дубликатов."""
-        existing = self.load_vacancies()
-        store = {v.url: v.to_dict() for v in existing}
-        for v in vacancies:
-            store[v.url] = v.to_dict()
+        """Сохраняет список вакансий в JSON-файл"""
+        data = [vacancy.to_dict() for vacancy in vacancies]
         with open(self.__filename, "w", encoding="utf-8") as f:
-            json.dump(list(store.values()), f, ensure_ascii=False, indent=4)
+            json.dump(data, f, ensure_ascii=False, indent=2)
 
     def load_vacancies(self) -> List[Vacancy]:
-        """Загружает вакансии из JSON-файла, возвращает список Vacancy."""
+        """Загружает список вакансий из JSON-файла"""
         try:
             with open(self.__filename, "r", encoding="utf-8") as f:
                 data = json.load(f)

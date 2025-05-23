@@ -1,10 +1,18 @@
 from src.utils import filter_by_keyword, filter_by_min_salary, sort_by_salary
 from src.vacancy import Vacancy
+from typing import Optional
 
 
-def mk(name, company, s_from, s_to, cur, url):
+def mk(title: str, company: str, salary_from: Optional[int], salary_to: Optional[int], currency: Optional[str], url: str) -> Vacancy:
     """Хелпер для создания Vacancy."""
-    return Vacancy(name, company, s_from, s_to, cur, url)
+    return Vacancy(
+        title=title,
+        company=company,
+        salary_from=salary_from,
+        salary_to=salary_to,
+        currency=currency,
+        url=url if url.startswith('http') else f'http://{url}'
+    )
 
 
 def test_filter_by_keyword():

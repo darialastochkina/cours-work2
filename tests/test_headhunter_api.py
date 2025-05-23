@@ -1,4 +1,5 @@
 import requests
+import pytest
 from src.api import HeadHunterAPI
 from src.vacancy import Vacancy
 
@@ -30,13 +31,37 @@ def dummy_get(url, params=None):
     return DummyResponse(status_code=200, json_data={"items": [item]})
 
 
-def test_get_vacancies_success(monkeypatch):
-    """Успешный вызов get_vacancies возвращает список Vacancy."""
-    monkeypatch.setattr("requests.get", dummy_get)
+@pytest.fixture
+def mock_response(requests_mock):
+    """Фикстура для мока ответа API"""
+    mock_data = {
+        "items": [{
+            "name": "Python Developer",
+            "url": "http://test.com",
+            "salary": {
+                "from": 100000,
+                "to": 150000
+            },
+            "snippet": {"requirement": "Test description"}
+        }]
+    }
+    requests_mock.get("https://api.hh.ru/vacancies", json=mock_data)
+    return mock_data
+
+
+def test_get_vacancies_success(requests_mock):
+    """Возвращает Vacancy-list при удачном HTTP-ответе."""
+    items = [{
+        "name": "TestVac",
+        "employer": {"name": "TestCo"},
+        "salary": {"from": 100, "to": 200, "currency": "USD"},
+        "alternate_url": "http://test"
+    }]
+    # подменяем реальный HTTP-запрос
+    requests_mock.get(HeadHunterAPI.BASE_URL, json={"items": items})
     api = HeadHunterAPI()
     result = api.get_vacancies("python", per_page=1)
-    assert isinstance(result, list)
-    assert len(result) == 1
+    assert isinstance(result, list) and len(result) == 1
     vac = result[0]
     assert isinstance(vac, Vacancy)
     assert vac.title == "TestVac"
@@ -47,10 +72,18 @@ def test_get_vacancies_success(monkeypatch):
     assert vac.url == "http://test"
 
 
-def test_get_vacancies_connect_fail(monkeypatch):
-    """При ошибке соединения get_vacancies возвращает пустой список."""
-    def fail_get(url, params=None):
-        raise requests.RequestException("fail")
-    monkeypatch.setattr("requests.get", fail_get)
+def test_get_vacancies_http_error(requests_mock):
+    """При HTTP500 или другом коде ≠200 возвращает пустой список."""
+    requests_mock.get(HeadHunterAPI.BASE_URL, status_code=500)
+    api = HeadHunterAPI()
+    assert api.get_vacancies("irrelevant") == []
+
+
+def test_get_vacancies_network_error(monkeypatch):
+    """При сетевой ошибке (RequestException) возвращает пустой список."""
+    def fail(*args, **kwargs):
+        raise requests.RequestException("network fail")
+
+    monkeypatch.setattr(requests, "get", fail)
     api = HeadHunterAPI()
     assert api.get_vacancies("x") == []
