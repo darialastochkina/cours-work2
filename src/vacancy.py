@@ -3,7 +3,6 @@ from typing import Optional
 
 class Vacancy:
     """Класс для работы с вакансиями"""
-    
     def __init__(
         self,
         title:       str,
@@ -14,20 +13,21 @@ class Vacancy:
         url:         str
     ) -> None:
         """Описывает вакансию и валидирует входные данные."""
-        self.title       = title
-        self.company     = company
+        self.title = title
+        self.company = company
 
-        # нормализуем зарплату
-        self.salary_from = salary_from if isinstance(salary_from, int) and salary_from > 0 else 0
-        self.salary_to   = salary_to   if isinstance(salary_to,   int) and salary_to   > 0 else 0
+        self.salary_from = (
+            salary_from if isinstance(salary_from, int) and salary_from > 0 else 0
+        )
+        self.salary_to = (
+            salary_to if isinstance(salary_to, int) and salary_to > 0 else 0
+        )
 
-        # валидируем URL
         if not (url.startswith("http://") or url.startswith("https://")):
             raise ValueError(f"Некорректный URL: {url}")
-        self.url         = url
+        self.url = url
 
-        # оставляем None или строку
-        self.currency    = currency
+        self.currency = currency
 
     def __validate_url(self, url: str) -> str:
         """Валидация URL"""

@@ -21,7 +21,6 @@ class VacancySaver(ABC):
 
 class JSONSaver(VacancySaver):
     """Класс для работы с JSON-файлом"""
-    
     def __init__(self, filename: str):
         self.__filename = filename
 
