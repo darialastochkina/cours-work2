@@ -5,9 +5,10 @@ from .vacancy import Vacancy
 
 
 class VacancySaver(ABC):
-    """Абстрактный класс для сохранения/загрузки вакансий."""
+    """Abstract base class for saving vacancies"""
     @abstractmethod
     def save_vacancies(self, vacancies: List[Vacancy]) -> None:
+        """Save vacancies to storage"""
         pass
 
     @abstractmethod
@@ -20,15 +21,31 @@ class VacancySaver(ABC):
 
 
 class JSONSaver(VacancySaver):
-    """Класс для работы с JSON-файлом"""
-    def __init__(self, filename: str):
+    """Class for working with JSON files"""
+    def __init__(self, filename: str = "vacancies.json"):
+        """
+        Initialize JSONSaver
+        """
         self.__filename = filename
 
     def save_vacancies(self, vacancies: List[Vacancy]) -> None:
-        """Сохраняет список вакансий в JSON-файл"""
-        data = [vacancy.to_dict() for vacancy in vacancies]
+        """
+        Save vacancies to JSON file, avoiding duplicates
+        """
+        existing_vacancies = []
+        try:
+            with open(self.__filename, "r", encoding="utf-8") as f:
+                existing_vacancies = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+        existing_urls = {vacancy["url"] for vacancy in existing_vacancies}
+        new_vacancies = [
+            vacancy.to_dict() for vacancy in vacancies
+            if vacancy.url not in existing_urls
+        ]
+        all_vacancies = existing_vacancies + new_vacancies
         with open(self.__filename, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+            json.dump(all_vacancies, f, ensure_ascii=False, indent=2)
 
     def load_vacancies(self) -> List[Vacancy]:
         """Загружает список вакансий из JSON-файла"""

@@ -1,13 +1,23 @@
 import requests
-from typing import List
-from .vacancy import Vacancy
+from typing import List, Dict, Any
+from abc import ABC, abstractmethod
 
 
-class HeadHunterAPI:
+class BaseAPI(ABC):
+    """Abstract base class for API interactions"""
+    @abstractmethod
+    def get_vacancies(self, keyword: str, per_page: int = 20) -> List[Dict[str, Any]]:
+        """
+        Get vacancies from API
+        """
+        pass
+
+
+class HeadHunterAPI(BaseAPI):
     """Класс для работы с API HeadHunter"""
     BASE_URL = "https://api.hh.ru/vacancies"
 
-    def get_vacancies(self, keyword: str, per_page: int = 20) -> List[Vacancy]:
+    def get_vacancies(self, keyword: str, per_page: int = 20) -> List[Dict[str, Any]]:
         """Получает список вакансий по ключевому слову"""
         params = {"text": keyword}
         if per_page is not None:
@@ -23,14 +33,14 @@ class HeadHunterAPI:
         return [self._parse(item) for item in items]
 
     @staticmethod
-    def _parse(item: dict) -> Vacancy:
+    def _parse(item: dict) -> Dict[str, Any]:
         """Преобразует dict в объект Vacancy"""
         salary = item.get("salary") or {}
-        return Vacancy(
-            title=item.get("name", ""),
-            company=item.get("employer", {}).get("name", ""),
-            salary_from=salary.get("from"),
-            salary_to=salary.get("to"),
-            currency=salary.get("currency"),
-            url=item.get("alternate_url", "")
-        )
+        return {
+            "title": item.get("name", ""),
+            "company": item.get("employer", {}).get("name", ""),
+            "salary_from": salary.get("from"),
+            "salary_to": salary.get("to"),
+            "currency": salary.get("currency"),
+            "url": item.get("alternate_url", "")
+        }

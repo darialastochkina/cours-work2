@@ -3,7 +3,14 @@ from src.vacancy import Vacancy
 from typing import Optional
 
 
-def mk(title: str, company: str, salary_from: Optional[int], salary_to: Optional[int], currency: Optional[str], url: str) -> Vacancy:
+def mk(
+    title: str,
+    company: str,
+    salary_from: Optional[int],
+    salary_to: Optional[int],
+    currency: Optional[str],
+    url: str
+) -> Vacancy:
     """Хелпер для создания Vacancy."""
     return Vacancy(
         title=title,
