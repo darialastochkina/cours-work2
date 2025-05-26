@@ -1,33 +1,19 @@
-from typing import Optional
+from typing import Optional, Dict
 
 
 class Vacancy:
     """Класс для работы с вакансиями"""
-    def __init__(
-        self,
-        title:       str,
-        company:     str,
-        salary_from: Optional[int],
-        salary_to:   Optional[int],
-        currency:    Optional[str],
-        url:         str
-    ) -> None:
-        """Описывает вакансию и валидирует входные данные."""
+    def __init__(self, title: str, salary: Optional[Dict], url: str, description: str):
+        """
+        Initialize Vacancy instance
+        """
+        self.__validate_title(title)
+        self.__validate_url(url)
+        self.__validate_description(description)
         self.title = title
-        self.company = company
-
-        self.salary_from = (
-            salary_from if isinstance(salary_from, int) and salary_from > 0 else 0
-        )
-        self.salary_to = (
-            salary_to if isinstance(salary_to, int) and salary_to > 0 else 0
-        )
-
-        if not (url.startswith("http://") or url.startswith("https://")):
-            raise ValueError(f"Некорректный URL: {url}")
         self.url = url
-
-        self.currency = currency
+        self.description = description
+        self.salary = self.__process_salary(salary)
 
     def __validate_url(self, url: str) -> str:
         """Валидация URL"""
